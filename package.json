@@ -17,7 +17,8 @@
     "ym": "0.0.8",
     "bem-xjst": "~0.3.1",
     "bemhtml-compat": "~0.0.4",
-    "bem-environ": "~1.2.0"
+    "bem-environ": "~1.2.0",
+    "dom-js": "*"
   },
   "devDependencies": {
     "bem": "~0.6.15",
