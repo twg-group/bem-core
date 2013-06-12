@@ -1,5 +1,5 @@
 var BEM = require('bem'),
-    Q = BEM.require('qq'),
+    Q = BEM.require('q'),
     PATH = require('path'),
     LangsMixin = require('./i18n').LangsMixin,
     VM = require('vm'),
@@ -54,24 +54,28 @@ exports.techMixin = BEM.util.extend({}, LangsMixin, {
 
                 var res = {};
 
-                _this.getLangs().forEach(function(lang) {
+                return Q.all(_this.getLangs()
+                    .map(function(lang) {
 
-                    var suffix = _this.getCreateSuffixForLang(lang),
-                        dataLang = _this.extendLangDecl({}, data['all'] || {});
+                        var suffix = _this.getCreateSuffixForLang(lang),
+                            dataLang = _this.extendLangDecl({}, data['all'] || {});
 
-                    dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
+                        dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
 
-                    res[suffix] = _this.getCreateResult(
-                        _this.getPath(prefix, suffix),
-                        suffix,
-                        BEM.util.extend({}, vars, { data: dataLang, lang: lang }));
+                        return Q.when(_this.getCreateResult(
+                                _this.getPath(prefix, suffix),
+                                suffix,
+                                BEM.util.extend({}, vars, { data: dataLang, lang: lang })))
+                            .then(function(r) {
+                                res[suffix] = r;
+                            });
 
-                });
-
-                // NOTE: hack to pass outputName to storeCreateResult()
-                res[_this.getBaseTechSuffix()] = prefix;
-
-                return Q.shallow(res);
+                    }))
+                    .then(function() {
+                        // NOTE: hack to pass outputName to storeCreateResult()
+                        res[_this.getBaseTechSuffix()] = prefix;
+                        return res;
+                    });
 
             });
 
