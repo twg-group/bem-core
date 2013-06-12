@@ -1,5 +1,5 @@
 var BEM = require('bem'),
-    Q = BEM.require('qq'),
+    Q = BEM.require('q'),
     LangsMixin = require('./i18n').LangsMixin,
     PATH = require('path'),
     I18NJS = require('../../common.blocks/i-bem/__i18n/lib/i18n-js');
@@ -35,20 +35,25 @@ exports.techMixin = BEM.util.extend({}, LangsMixin, {
 
                 var res = {};
 
-                _this.getLangs().forEach(function(lang) {
+                return Q.all(_this.getLangs()
+                    .map(function(lang) {
 
-                    var suffix = _this.getBuildSuffixForLang(lang),
-                        dataLang = _this.extendLangDecl({}, data['all'] || {});
+                        var suffix = _this.getBuildSuffixForLang(lang),
+                            dataLang = _this.extendLangDecl({}, data['all'] || {});
 
-                    dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
-                    res[suffix] = _this.getBuildResult(prefixes, suffix, outputDir, outputName, dataLang, lang);
+                        dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
 
-                });
+                        return Q.when(_this.getBuildResult(prefixes, suffix, outputDir, outputName, dataLang, lang))
+                            .then(function(r) {
+                                res[suffix] = r;
+                            });
 
-                // NOTE: hack to pass outputName to storeBuildResult()
-                res[_this.getBaseTechSuffix()] = outputName;
-
-                return Q.shallow(res);
+                    }))
+                    .then(function() {
+                        // NOTE: hack to pass outputName to storeBuildResult()
+                        res[_this.getBaseTechSuffix()] = outputName;
+                        return res;
+                    });
 
             });
 
