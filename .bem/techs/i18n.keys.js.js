@@ -1,5 +1,5 @@
 var BEM = require('bem'),
-    Q = BEM.require('qq'),
+    Q = BEM.require('q'),
     PATH = require('path'),
     I18NJS = require('../../common.blocks/i-bem/__i18n/lib/i18n-js'),
 
@@ -30,29 +30,37 @@ exports.techMixin = U.extend({}, require('./i18n').LangsMixin, {
 
         return BEM.util.readJsonJs(source)
             .then(function(data) {
-                return Q.shallow([
-                        _this.getCreateResultsForLangs(prefix, data),
-                        _this.getCreateResultsForAll(prefix, data)
-                    ].reduce(function(a, b) { return U.extend(a, b) }));
+
+                return Q.when(_this.getCreateResultsForLangs(prefix, data))
+                    .then(function(res) {
+                        return U.extend(res, _this.getCreateResultsForAll(prefix, data));
+                    });
+
             });
 
     },
 
     getCreateResultsForLangs: function(prefix, data) {
 
-        var _this = this;
+        var _this = this,
+            res = {};
 
-        return _this.getLangs().reduce(function(res, lang) {
+        return Q.all(_this.getLangs()
+            .map(function(lang) {
 
-            var suffix = _this.getSuffixForLang(lang),
-                dataLang = _this.extendLangDecl({}, data['all'] || {});
+                var suffix = _this.getSuffixForLang(lang),
+                    dataLang = _this.extendLangDecl({}, data['all'] || {});
 
-            dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
-            res[suffix] = _this.getCreateResult(prefix, suffix, dataLang, lang);
+                dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
+                return Q.when(_this.getCreateResult(prefix, suffix, dataLang, lang))
+                    .then(function(r) {
+                        res[suffix] = r;
+                    });
 
-            return res;
-
-        }, {});
+            }))
+            .then(function() {
+                return res;
+            });
 
     },
 
