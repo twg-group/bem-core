@@ -1,6 +1,5 @@
 /*global MAKE: true */
 
-require('./nodes');
 
 var PATH = require('path'),
     environ = require('bem-environ')(__dirname);
@@ -8,6 +7,7 @@ var PATH = require('path'),
 
 module.exports = function(MAKE) {
 
+    require('./nodes').extendMake(MAKE);
     environ.extendMake(MAKE);
 
     try {
