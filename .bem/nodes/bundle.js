@@ -60,6 +60,10 @@ require('bem/lib/nodesregistry').decl('BundleNode', {
 
     'create-bemtree.xjst.js-optimizer-node' : function() {
         return this['create-bemtree-xjst-optimizer-node'].apply(this, arguments);
+    },
+
+    'create-i18n.browser.js+bemhtml-optimizer-node': function() {
+        return this['create-js-optimizer-node'].apply(this, arguments);
     }
 
 });
