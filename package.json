@@ -18,7 +18,7 @@
     "bem-techs-core": "~0.2.1"
   },
   "devDependencies": {
-    "bem": "1.0.0-alpha4",
+    "bem": "git://github.com/bem/bem-tools.git#b97232a247629ce904f0deebc9fdc403f1c3921c",
     "mocha": "~1.9.0",
     "jshint": "2.1.8",
     "jshint-groups": "0.5.1",
