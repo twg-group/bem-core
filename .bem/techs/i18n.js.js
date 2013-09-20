@@ -12,61 +12,57 @@ exports.techMixin = BEM.util.extend({}, LangsMixin, {
         return 'js';
     },
 
-    getBuildSuffixes: function() {
+    getBuildSuffixesMap: function() {
 
-        return this.getLangs()
-            .map(this.getBuildSuffixForLang, this)
-            .concat([this.getBaseTechSuffix()]);
+        var suffixes = {},
+            baseSuffixes = this.__base()[this.getBaseTechSuffix()] || 
+                           [this.getBaseTechSuffix()];
 
+
+        this.getLangs()
+            .map(this.getBuildSuffixForLang, this).concat([this.getBaseTechSuffix()])
+            .forEach(function(s) {
+                suffixes[s] = baseSuffixes;
+            }, this);
+
+        return suffixes;
     },
 
     getBuildSuffixForLang: function(lang) {
         return lang + '.' + this.getBaseTechSuffix();
     },
 
-    getBuildResults: function(prefixes, outputDir, outputName) {
+    getBuildResults: function(decl, levels, output, opts) {
 
         var _this = this,
-            prefix = PATH.resolve(outputDir, outputName),
-            source = this.getPath(prefix, this.getSourceSuffix());
+            source = this.getPath(output, this.getSourceSuffix()),
+            base = this.__base;
 
         return BEM.util.readJsonJs(source)
             .then(function(data) {
+                if (!opts) opts = {};
+                opts.ctx = {
+                    data: data
+                };
 
-                var res = {};
-
-                return Q.all(_this.getLangs()
-                    .map(function(lang) {
-
-                        var suffix = _this.getBuildSuffixForLang(lang),
-                            dataLang = _this.extendLangDecl({}, data['all'] || {});
-
-                        dataLang = _this.extendLangDecl(dataLang, data[lang] || {});
-
-                        return Q.when(_this.getBuildResult(prefixes, suffix, outputDir, outputName, dataLang, lang))
-                            .then(function(r) {
-                                res[suffix] = r;
-                            });
-
-                    }))
-                    .then(function() {
-                        // NOTE: hack to pass outputName to storeBuildResult()
-                        res[_this.getBaseTechSuffix()] = outputName;
-                        return res;
-                    });
-
+                return base.call(_this, decl, levels, output, opts);
             });
-
     },
 
-    getBuildResult: function(prefixes, suffix, outputDir, outputName, data, lang) {
+    getBuildResult: function(files, suffix, output, opts) {
+
+        if (suffix === this.getBaseTechSuffix()) return Q.resolve(output);
 
         var _this = this;
-        return this.__base(prefixes, this.getBaseTechSuffix(), outputDir, outputName)
+        return this.__base.apply(this, arguments)
             .then(function(res) {
-                return data && !BEM.util.isEmptyObject(data)? res
-                        .concat(_this.serializeI18nData(data, lang))
-                        .concat([_this.serializeI18nInit(lang)]) : res;
+                var lang = suffix.substr(0, 2),
+                    dataLang = _this.extendLangDecl({}, opts.ctx.data['all'] || {});
+
+                dataLang = _this.extendLangDecl(dataLang, opts.ctx.data[suffix.substr(0, 2)] || {});
+
+                return res.concat(dataLang? _this.serializeI18nData(dataLang, lang) : [])
+                    .concat([_this.serializeI18nInit(lang)]);
             });
 
     },

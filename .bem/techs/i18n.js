@@ -59,59 +59,40 @@ var LangsMixin = exports.LangsMixin = {
 
 };
 
-exports.Tech = INHERIT(BEM.Tech, BEM.util.extend({}, LangsMixin, {
+exports.Tech = INHERIT(BEM.TechV2, BEM.util.extend({}, LangsMixin, {
 
     getSuffixForLang: function(lang) {
         return pjoin(this.getTechName(), lang + '.js');
-    },
-
-    getSuffixes: function() {
-        return this.getBuildSuffixes().concat(this.getCreateSuffixes());
     },
 
     getCreateSuffixes: function() {
         return this.getLangs().map(this.getSuffixForLang, this);
     },
 
-    getBuildSuffixes: function() {
-        return [this.getSuffixForLang('all')];
+    getBuildSuffixesMap: function() {
+        var suffixes = {};
+        suffixes[this.getSuffixForLang('all')] = this.getLangs()
+            .map(this.getSuffixForLang, this)
+            .concat(this.getSuffixForLang('all'));
+
+        return suffixes;
     },
 
-    getBuildResult: function(prefixes, suffix, outputDir, outputName) {
+    getBuildResult: function(files, suffix, output, opts) {
 
-        var _this = this;
-        return Q.all(this.filterPrefixes(prefixes, this.getBuildSuffixes()))
-            .then(function(allPaths) {
+        var _this = this,
+            src = _this.getSourceSuffix();
 
-                // read and process *.i18n/all.js files of BEM entities
-                var decl = allPaths.reduce(function(decl, path) {
+        return Q.when(
+            files.reduce(function(decl, file) {
+                var all = (file.suffix === src);
 
-                    return Q.all([decl, _this.readContent(path, suffix)])
-                        .spread(_this.extendDecl.bind(_this));
-
-                }, {});
-
-                // read and process *.i18n/[lang].js files of BEM entities
-                return _this.getLangs().reduce(function(decl, lang) {
-
-                    // filter prefixes for each lang
-                    return _this.filterPrefixes(prefixes, [_this.getSuffixForLang(lang)])
-                        .then(function(langPaths) {
-
-                            // read and process files for concrete lang
-                            return langPaths.reduce(function(decl, path) {
-
-                                return Q.all([decl, _this.readLangContent(path, lang)])
-                                    .spread(_this.extendLangDecl.bind(_this));
-
-                            }, decl);
-
-                        });
-
-                }, decl);
-
-            });
-
+                return Q.all([decl, all?
+                    _this.readContent(file.absPath, file.suffix):
+                    _this.readLangContent(file.absPath, file.file.substr(0, 2))])
+                    .spread(all? _this.extendDecl.bind(_this): _this.extendLangDecl.bind(_this));
+            }, {})
+        );
     },
 
     storeBuildResult: function(path, suffix, res) {
