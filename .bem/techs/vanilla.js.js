@@ -11,10 +11,6 @@ exports.techMixin = {
         return ['vanilla.js'];
     },
 
-    getBuildSuffixes : function() {
-        return ['vanilla.js'];
-    },
-
     getBuildSuffixesMap : function() {
         return this.getSuffixes()
             .reduce(function(map, suffix) {
@@ -46,8 +42,8 @@ exports.techMixin = {
     },
 
     getYmChunk : function(output) {
-        var outputDir = PATH.resolve(output, '..');
-        return PATH.relative(outputDir, ymPath);
+        return this.getBuildResultChunk(
+            PATH.relative(PATH.resolve(output, '..'), ymPath));
     },
 
     getBuildResult : function(files, suffix, output, opts) {

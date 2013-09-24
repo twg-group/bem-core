@@ -37,7 +37,7 @@ exports.getTechs = function() {
         'node.js',
         'browser.js+bemhtml',
         'i18n',
-        'i18n.js',
+        'i18n.browser.js+bemhtml',
         'i18n.html'
     ].forEach(function(name) {
         techs[name] = join(PRJ_TECHS, name + '.js');

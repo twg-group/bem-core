@@ -259,6 +259,12 @@ bem_.I18N = (function(base) {
 
 }(new _i18n()));
 
+if(typeof modules === 'object') {
+    modules.define('BEMI18N', function(provide) {
+        provide(bem_.I18N);
+    });
+}
+
 })(this, typeof BEM === 'undefined'? {} : BEM);
 
 }); // oninit

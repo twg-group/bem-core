@@ -14,19 +14,10 @@ exports.techMixin = {
         return ['browser.js'];
     },
 
-    getBuildSuffixes : function() {
-        return ['js'];
-    },
-
     getBuildSuffixesMap : function() {
         return {
             'js' : this.getSuffixes()
         };
-    },
-
-    getYmChunk : function() {
-        var ymRelPath = this.__base.apply(this, arguments);
-        return this.getBuildResultChunk(ymRelPath);
     }
 
 };

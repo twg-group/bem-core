@@ -4,7 +4,7 @@ var BEM = require('bem'),
     PATH = require('path'),
     I18NJS = require('../../common.blocks/i-bem/__i18n/lib/i18n-js');
 
-exports.baseTechName = 'js';
+exports.baseTechName = 'browser.js+bemhtml';
 
 exports.techMixin = BEM.util.extend({}, LangsMixin, {
 
@@ -51,7 +51,11 @@ exports.techMixin = BEM.util.extend({}, LangsMixin, {
 
     getBuildResult: function(files, suffix, output, opts) {
 
-        if (suffix === this.getBaseTechSuffix()) return Q.resolve(output);
+        // NOTE: for symlink use file path as content
+        if (suffix === this.getBaseTechSuffix())
+            return Q.resolve(this.getPath(
+                output,
+                this.getBuildSuffixForLang(this.getDefaultLang())));
 
         var _this = this;
         return this.__base.apply(this, arguments)
@@ -73,14 +77,8 @@ exports.techMixin = BEM.util.extend({}, LangsMixin, {
 
     storeBuildResult: function(path, suffix, res) {
 
-        if (suffix === this.getBaseTechSuffix()) {
-            return BEM.util.symbolicLink(
-                path,
-                this.getPath(
-                    res,
-                    this.getBuildSuffixForLang(this.getDefaultLang())),
-                true);
-        }
+        if (suffix === this.getBaseTechSuffix())
+            return BEM.util.symbolicLink(path, res, true);
 
         return this.__base(path, suffix, res);
 
