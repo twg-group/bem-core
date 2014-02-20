@@ -33,7 +33,8 @@ module.exports = {
                 '**/*.deps.js',
                 '**/*.node.js',
                 '**/*.spec.js',
-                '**/*.vanilla.js'
+                '**/*.vanilla.js',
+                'common.blocks/jquery/__event/_type/jquery__event_type_pointerclick.js'
             ]
         },
 
