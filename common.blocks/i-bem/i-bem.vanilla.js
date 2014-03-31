@@ -659,24 +659,7 @@ var BEMBlock = inherit(events.Emitter, /** @lends BEMBlock.prototype */ {
      * @param {Object} elem Nested element
      * @returns {String|undefined}
      */
-    _extractElemNameFrom : function(elem) {},
-
-    /**
-     * Executes the block init functions
-     * @private
-     */
-    _runInitFns : function() {
-        if(initFns.length) {
-            var fns = initFns,
-                fn, i = 0;
-
-            initFns = [];
-            while(fn = fns[i]) {
-                fn.call(fns[i + 1]);
-                i += 2;
-            }
-        }
-    }
+    _extractElemNameFrom : function(elem) {}
 });
 
 provide(/** @exports */{
@@ -732,6 +715,23 @@ provide(/** @exports */{
     declMix : function(blockName, props, staticProps) {
         convertModHandlersToMethods(props || (props = {}));
         return blocks[blockName] = inherit(props, staticProps);
+    },
+
+    /**
+     * Executes the block init functions
+     * @private
+     */
+    _runInitFns : function() {
+        if(initFns.length) {
+            var fns = initFns,
+                fn, i = 0;
+
+            initFns = [];
+            while(fn = fns[i]) {
+                fn.call(fns[i + 1]);
+                i += 2;
+            }
+        }
     }
 });
 
