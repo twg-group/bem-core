@@ -254,10 +254,19 @@ describe('i-bem-dom', function() {
         });
     });
 
-    describe('DOM.init', function() {
+    describe('BEMDOM.init', function() {
+        var spy, rootNode;
+        beforeEach(function() {
+            spy = sinon.spy();
+        });
+
+        afterEach(function() {
+            BEMDOM.destruct(rootNode);
+            delete BEM.blocks['block'];
+        });
+
         it('should init block', function() {
-            var spy = sinon.spy();
-            BEM.declBlock('block', {
+            BEMDOM.declBlock('block', {
                 onSetMod : {
                     js : {
                         inited : spy
@@ -265,19 +274,15 @@ describe('i-bem-dom', function() {
                 }
             });
 
-            var rootNode = BEMDOM.init($(BEMHTML.apply({
-                    tag : 'div',
-                    content : { block : 'block', js : true } })));
+            rootNode = BEMDOM.init($(BEMHTML.apply({
+                tag : 'div',
+                content : { block : 'block', js : true } })));
 
-            spy.called.should.be.true;
-
-            BEMDOM.destruct(rootNode);
-            delete BEM.blocks['block'];
+            spy.should.have.been.called;
         });
 
         it('shouldn\'t init live block', function() {
-            var spy = sinon.spy();
-            BEM.declBlock('block', {
+            BEMDOM.declBlock('block', {
                 onSetMod : {
                     js : {
                         inited : spy
@@ -287,20 +292,16 @@ describe('i-bem-dom', function() {
                 live : true
             });
 
-            var rootNode = BEMDOM.init($(BEMHTML.apply({
-                    tag : 'div',
-                    content : { block : 'block', js : true } })));
+            rootNode = BEMDOM.init($(BEMHTML.apply({
+                tag : 'div',
+                content : { block : 'block', js : true } })));
 
             BEMDOM.init(rootNode);
-            spy.called.should.be.false;
-
-            BEMDOM.destruct(rootNode);
-            delete BEM.blocks['block'];
+            spy.should.not.have.been.called;
         });
 
         it('should allow to pass string', function() {
-            var spy = sinon.spy();
-            BEM.declBlock('block', {
+            BEMDOM.declBlock('block', {
                 onSetMod : {
                     js : {
                         inited : spy
@@ -308,21 +309,26 @@ describe('i-bem-dom', function() {
                 }
             });
 
-            var rootNode = BEMDOM.init(BEMHTML.apply({
-                    tag : 'div',
-                    content : { block : 'block', js : true } }));
+            rootNode = BEMDOM.init(BEMHTML.apply({
+                tag : 'div',
+                content : { block : 'block', js : true } }));
 
-            spy.called.should.be.true;
-
-            BEMDOM.destruct(rootNode);
-            delete BEM.blocks['block'];
+            spy.should.have.been.called;
         });
     });
 
-    describe('DOM.destruct', function() {
+    describe('BEMDOM.destruct', function() {
+        var spy, rootNode;
+        beforeEach(function() {
+            spy = sinon.spy();
+        });
+
+        afterEach(function() {
+            delete BEM.blocks['block'];
+        });
+
         it('should destruct block only if it has no dom nodes', function() {
-            var spy = sinon.spy();
-            BEM.declBlock('block', {
+            BEMDOM.declBlock('block', {
                 onSetMod : {
                     js : {
                         '' : spy
@@ -330,27 +336,25 @@ describe('i-bem-dom', function() {
                 }
             });
 
-            var rootNode = BEMDOM.init($(BEMHTML.apply({
-                    tag : 'div',
-                    content : [
-                        { block : 'block', js : { id : 'block' } },
-                        { block : 'block', js : { id : 'block' } }
-                    ]
-                })));
+            rootNode = BEMDOM.init($(BEMHTML.apply({
+                tag : 'div',
+                content : [
+                    { block : 'block', js : { id : 'block' } },
+                    { block : 'block', js : { id : 'block' } }
+                ]
+            })));
 
             BEMDOM.destruct(rootNode.find('.block :eq(0)'));
-            spy.called.should.be.false;
+            spy.should.not.have.been.called;
 
             BEMDOM.destruct(rootNode.find('.block'));
-            spy.called.should.be.true;
+            spy.should.have.been.called;
 
             BEMDOM.destruct(rootNode);
-            delete BEM.blocks['block'];
         });
 
         it('should destruct implicitly inited block', function() {
-            var spy = sinon.spy();
-            BEM.declBlock('imp-block', {
+            BEMDOM.declBlock('block', {
                 onSetMod : {
                     js : {
                         '' : spy
@@ -358,16 +362,19 @@ describe('i-bem-dom', function() {
                 }
             });
 
-            var blockNode = BEMDOM.init($(BEMHTML.apply({ block : 'imp-block' })));
-            blockNode.bem('imp-block');
-            BEMDOM.destruct(blockNode);
-            spy.should.have.been.calledOnce;
+            rootNode = BEMDOM.init(BEMHTML.apply({
+                tag : 'div',
+                content : { block : 'block' }
+            }));
 
-            delete BEM.blocks['imp-block'];
+            var blockNode = rootNode.find('.block');
+            blockNode.bem('block');
+            BEMDOM.destruct(blockNode);
+            spy.should.have.been.called;
         });
     });
 
-    describe('DOM.update', function() {
+    describe('BEMDOM.update', function() {
         it('should update tree', function() {
             var spyBlock1Destructed = sinon.spy(),
                 spyBlock2Inited = sinon.spy();

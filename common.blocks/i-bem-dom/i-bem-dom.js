@@ -128,7 +128,7 @@ function initBlock(blockName, domElem, params, forceLive, callback) {
         $.unique(uniqIdToDomElems[uniqId]);
     }
 
-    var blockClass = blocks[blockName] || BEMDOM.decl(blockName, {}, { live : true }, true);
+    var blockClass = blocks[blockName] || BEMDOM.declBlock(blockName, {}, { live : true }, true);
     if(!(blockClass._liveInitable = !!blockClass._processLive()) || forceLive || params.live === false) {
         forceLive && domElem.addClass(BEM_CLASS); // add css class for preventing memory leaks in further destructing
 
