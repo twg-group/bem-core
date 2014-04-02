@@ -684,7 +684,7 @@ provide(/** @exports */{
      * @returns {Function}
      */
     declBlock : function(blockName, baseBlocks, props, staticProps) {
-        if(typeof baseBlocks === 'object' && !Array.isArray(baseBlocks)) {
+        if(!baseBlocks || (typeof baseBlocks === 'object' && !Array.isArray(baseBlocks))) {
             staticProps === props;
             props = baseBlocks;
             baseBlocks = blocks[blockName] || BEMBlock;

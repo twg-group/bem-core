@@ -850,7 +850,7 @@ var BEMDOMBlock = inherit(BEM.Block,/** @lends BEMDOMBlock.prototype */{
         var _this = this,
             _self = _this.__self;
 
-        _this._needSpecialUnbind && _self.doc.add(_self.win).unbind('.' + _this._uniqId);
+        _this._needSpecialUnbind && BEMDOM.doc.add(_self.win).unbind('.' + _this._uniqId);
 
         _this.__base();
 
@@ -1320,7 +1320,7 @@ var BEMDOM = /** @exports */{
     Block : BEMDOMBlock,
 
     declBlock : function(blockName, baseBlocks, props, staticProps) {
-        if(typeof baseBlocks === 'object' && !Array.isArray(baseBlocks)) {
+        if(!baseBlocks || (typeof baseBlocks === 'object' && !Array.isArray(baseBlocks))) {
             staticProps = props;
             props = baseBlocks;
             baseBlocks = BEMDOMBlock;
@@ -1337,8 +1337,11 @@ var BEMDOM = /** @exports */{
      * @returns {jQuery} ctx Initialization context
      */
     init : function(ctx) {
-        if(typeof ctx === 'string') ctx = $(ctx);
-        else if(!ctx) ctx = BEMDOM.scope;
+        if(typeof ctx === 'string') {
+            ctx = $(ctx);
+        } else if(!ctx) {
+            ctx = BEMDOM.scope;
+        }
 
         var uniqInitId = identify();
         findDomElem(ctx, BEM_SELECTOR).each(function() {
